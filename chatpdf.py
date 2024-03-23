@@ -57,7 +57,7 @@ def get_conversational_chain():
                              temperature=0.3)
 
     prompt = PromptTemplate(template = prompt_template, input_variables = ["context", "question"])
-    chain = load_qa_chain(model, chain_type="stuff", prompt=prompt)
+    chain = load_qa_chain(model, chain_type="stuff", prompt=prompt, generate_kwargs={"max_tokens": 512})
 
     return chain
 
