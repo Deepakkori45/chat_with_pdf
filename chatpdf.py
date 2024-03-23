@@ -85,7 +85,7 @@ def user_input(user_question):
 
 def main():
     st.set_page_config("Chat PDF")
-    st.header("Chat with the Data Model💁")
+    st.header("Chat with Model💁")
 
     user_question = st.text_input("Ask a Question from the PDF Files")
 
