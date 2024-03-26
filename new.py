@@ -95,51 +95,39 @@ def display_history():
 
 # Main function to configure the app and handle user interactions
 def main():
-    st.set_page_config(page_title="Chat PDF")
-    st.header("Chat with Gemini-Pro")
+    st.set_page_config("Chat PDF")
+    st.header("Chat with Model💁")
 
     # Initialize conversation history if not already initialized
     if 'conversation_history' not in st.session_state:
         st.session_state.conversation_history = []
-
+    
+    # User input for asking questions
+    user_question = st.text_input("Ask a Question from the PDF Files")
+    if user_question:
+        user_input(user_question)
+        display_history()  # Display the conversation history
+        
     # Sidebar for uploading PDF files and processing them
     with st.sidebar:
         st.title("Menu:")
         pdf_docs = st.file_uploader("Upload your PDF Files and Click on the Submit & Process Button", accept_multiple_files=True)
+        # Continuation from the previous code block
         if st.button("Submit & Process"):
+            # Display a spinner while processing the PDF files
             with st.spinner("Processing..."):
+                # Extract text from the uploaded PDF files
                 raw_text = get_pdf_text(pdf_docs)
+                # Split the extracted text into chunks for processing
                 text_chunks = get_text_chunks(raw_text)
-                success = get_vector_store(text_chunks)
-                if success:
-                    st.success("Processing complete!")
-                else:
-                    st.error("Processing failed. Please try again.")
+                # Create a vector store from the text chunks using embeddings
+                get_vector_store(text_chunks)
+                # Notify the user that processing is complete
+                st.success("Processing complete!")
+                # Optionally, you can display the raw text or chunks to give feedback to the user
+                # st.write(raw_text) # Uncomment to display the raw extracted text
 
-    # Display chat history
-    st.write("## Conversation")
-    for role, message in st.session_state.conversation_history:
-        # This is a simplification, real chat UIs need more complex logic
-        if role == "User":
-            st.text_area("", value=message, label="You", key=message[:15] + "user", height=75)
-        else:  # Model response
-            st.text_area("", value=message, label="Gemini-Pro", key=message[:15] + "model", height=75, bg_color="#f0f2f6")
-
-    # User input for asking questions
-    user_question = st.text_input("Type your message here...", key="user_input")
-
-    if user_question:
-        # Simulate sending the message to a model and receiving a response
-        # Placeholder for model interaction
-        # response = model.get_response(user_question)
-        response = "This is a simulated response for: " + user_question  # Placeholder response
-        
-        # Update conversation history
-        st.session_state.conversation_history.append(("User", user_question))
-        st.session_state.conversation_history.append(("Model", response))
-        
-        # Clear the text input field after submitting the question
-        st.session_state.user_input = ""
-
+# Entry point for the Streamlit application
 if __name__ == "__main__":
     main()
+
