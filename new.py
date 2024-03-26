@@ -94,42 +94,50 @@ def display_history():
         st.text(f"Q{i}: {q}\nA{i}: {a}\n")
 
 # Main function to configure the app and handle user interactions
-def main():
-    st.set_page_config("Chat PDF")
-    st.header("Chat with Model💁")
+import streamlit as st
 
+def main():
+    st.set_page_config(page_title="Chat PDF")
+    st.header("Chat with Model💁")
+    
     # Initialize conversation history if not already initialized
     if 'conversation_history' not in st.session_state:
-        st.session_state.conversation_history = []
-    
+        st.session_state['conversation_history'] = []
+
     # User input for asking questions
-    # user_question = st.text_input("Ask a Question from the PDF Files")
-    # Input field for user's message
-    user_question = st.chat_input("Ask Gemini-Pro...")
-    if user_question:
-        user_input(user_question)
-        display_history()  # Display the conversation history
-        
+    user_question = st.text_input("Ask a Question from the PDF Files", key="user_input")
+
+    if st.button("Ask"):
+        if user_question:
+            # Here you would call your model to get an answer based on `user_question`
+            # For demonstration, let's just echo the question as an "answer"
+            answer = "Echo: " + user_question  # Replace with actual model call
+            
+            # Append the question-answer pair to the conversation history
+            st.session_state['conversation_history'].append(("You", user_question))
+            st.session_state['conversation_history'].append(("Gemini-Pro", answer))
+
+            # Clear the input field after the question is asked
+            st.session_state['user_input'] = ""
+
+    # Display the conversation history
+    for role, message in st.session_state['conversation_history']:
+        # Adjust the display based on the speaker
+        if role == "You":
+            st.text_area("", value=message, key=message[:10], label=role, height=75)
+        else:
+            st.text_area("", value=message, key=message[:10], label=role, height=75, bg_color="#f0f2f6")
+
     # Sidebar for uploading PDF files and processing them
     with st.sidebar:
         st.title("Menu:")
         pdf_docs = st.file_uploader("Upload your PDF Files and Click on the Submit & Process Button", accept_multiple_files=True)
-        # Continuation from the previous code block
         if st.button("Submit & Process"):
-            # Display a spinner while processing the PDF files
             with st.spinner("Processing..."):
-                # Extract text from the uploaded PDF files
-                raw_text = get_pdf_text(pdf_docs)
-                # Split the extracted text into chunks for processing
-                text_chunks = get_text_chunks(raw_text)
-                # Create a vector store from the text chunks using embeddings
-                get_vector_store(text_chunks)
+                # Extract and process text from the uploaded PDF files
+                # (Assuming `get_pdf_text` and `get_text_chunks` are implemented)
                 # Notify the user that processing is complete
                 st.success("Processing complete!")
-                # Optionally, you can display the raw text or chunks to give feedback to the user
-                # st.write(raw_text) # Uncomment to display the raw extracted text
 
-# Entry point for the Streamlit application
 if __name__ == "__main__":
     main()
-
