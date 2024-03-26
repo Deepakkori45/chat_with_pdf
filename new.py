@@ -2,6 +2,7 @@
 import streamlit as st
 from PyPDF2 import PdfReader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain_google_genai._common import GoogleGenerativeAIError
 import os
 from langchain_google_genai import GoogleGenerativeAIEmbeddings
 import google.generativeai as genai
@@ -47,7 +48,7 @@ def get_vector_store(text_chunks):
         vector_store.save_local("faiss_index")
         return True  # Operation was successful
     except GoogleGenerativeAIError as e:
-        print(f"Error embedding content: {e}")  # Log the error for debugging
+        print(f"Error embedding content we will get back to you: {e}")  # Log the error for debugging
         return False  # Operation failed
 
 
