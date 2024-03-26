@@ -36,10 +36,20 @@ def get_text_chunks(text):
     return chunks
 
 # Function to create a vector store from the text chunks using embeddings
+# def get_vector_store(text_chunks):
+#     embeddings = GoogleGenerativeAIEmbeddings(model="models/embedding-001")
+#     vector_store = FAISS.from_texts(text_chunks, embedding=embeddings)
+#     vector_store.save_local("faiss_index")
 def get_vector_store(text_chunks):
-    embeddings = GoogleGenerativeAIEmbeddings(model="models/embedding-001")
-    vector_store = FAISS.from_texts(text_chunks, embedding=embeddings)
-    vector_store.save_local("faiss_index")
+    try:
+        embeddings = GoogleGenerativeAIEmbeddings(model="models/embedding-001")
+        vector_store = FAISS.from_texts(text_chunks, embedding=embeddings)
+        vector_store.save_local("faiss_index")
+        return True  # Operation was successful
+    except GoogleGenerativeAIError as e:
+        print(f"Error embedding content: {e}")  # Log the error for debugging
+        return False  # Operation failed
+
 
 # Function to initialize and return a conversational chain for processing and answering questions
 def get_conversational_chain():
