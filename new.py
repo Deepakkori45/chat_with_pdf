@@ -103,7 +103,8 @@ def main():
         st.session_state.conversation_history = []
     
     # User input for asking questions
-    user_question = st.text_input("Ask a Question from the PDF Files")
+    # user_question = st.text_input("Ask a Question from the PDF Files")
+    user_question  = st.chat_input("Ask a question")
     if user_question:
         user_input(user_question)
         display_history()  # Display the conversation history
