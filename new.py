@@ -93,47 +93,63 @@ def display_history():
     for i, (q, a) in enumerate(st.session_state.conversation_history, 1):
         st.text(f"Q{i}: {q}\nA{i}: {a}\n")
 
+# Improved function to display the conversation history like a chat
+def display_history():
+    # Display each message in the conversation history
+    for role, message in st.session_state.conversation_history:
+        # You can customize these styles
+        if role == "User":
+            st.markdown(f"<p style='text-align: left; color: black;'>{message}</p>", unsafe_allow_html=True)
+        else:  # Assuming role == "Model"
+            st.markdown(f"<p style='text-align: right; color: blue;'>{message}</p>", unsafe_allow_html=True)
+
+
 # Main function to configure the app and handle user interactions
 def main():
-    st.set_page_config("Chat PDF")
-    st.header("Chat with Model💁")
+    st.set_page_config(page_title="Chat PDF", layout="wide")
+    st.header("Chat with Gemini-Pro")
 
-    # Initialize conversation history if not already initialized
     if 'conversation_history' not in st.session_state:
         st.session_state.conversation_history = []
-    
-    # User input for asking questions
-    # user_question = st.text_input("Ask a Question from the PDF Files")
-    # Input field for user's message
-    user_question = st.chat_input("Ask Gemini-Pro...")
-    # if user_question:
-    #     user_input(user_question)
-    #     display_history()  # Display the conversation history
-        
-    # Display the chat history
-    for message in st.session_state.chat_session.history:
-        with st.chat_message(translate_role_for_streamlit(message.role)):
-            st.markdown(message.parts[0].text)
-    # Sidebar for uploading PDF files and processing them
-    with st.sidebar:
-        st.title("Menu:")
-        pdf_docs = st.file_uploader("Upload your PDF Files and Click on the Submit & Process Button", accept_multiple_files=True)
-        # Continuation from the previous code block
-        if st.button("Submit & Process"):
-            # Display a spinner while processing the PDF files
-            with st.spinner("Processing..."):
-                # Extract text from the uploaded PDF files
-                raw_text = get_pdf_text(pdf_docs)
-                # Split the extracted text into chunks for processing
-                text_chunks = get_text_chunks(raw_text)
-                # Create a vector store from the text chunks using embeddings
-                get_vector_store(text_chunks)
-                # Notify the user that processing is complete
-                st.success("Processing complete!")
-                # Optionally, you can display the raw text or chunks to give feedback to the user
-                # st.write(raw_text) # Uncomment to display the raw extracted text
 
-# Entry point for the Streamlit application
+    col1, col2 = st.columns([1, 5])
+
+    with col1:
+        # Sidebar content for uploading PDF files and processing them
+        st.title("Menu:")
+        pdf_docs = st.file_uploader("Upload your PDF Files", accept_multiple_files=True, type=['pdf'])
+        if st.button("Process Files"):
+            if pdf_docs:
+                with st.spinner("Processing..."):
+                    raw_text = get_pdf_text(pdf_docs)
+                    text_chunks = get_text_chunks(raw_text)
+                    success = get_vector_store(text_chunks)
+                    if success:
+                        st.success("Processing complete and vector store is updated!")
+                    else:
+                        st.error("Processing failed. Please try again.")
+            else:
+                st.warning("Please upload at least one PDF file.")
+
+    with col2:
+        # Chat interface
+        st.write("## Conversation")
+        user_question = st.text_input("Type your message here...", key="user_input")
+
+        if user_question:
+            # Here, simulate getting a response for demonstration purposes
+            # You'd replace this with the actual model call
+            response = "This is a simulated response."
+            
+            # Update the conversation history
+            st.session_state.conversation_history.append(("User", user_question))
+            st.session_state.conversation_history.append(("Model", response))
+
+            # Clear the text input field after submitting the question
+            st.session_state.user_input = ""
+
+        # Display the conversation history
+        display_history()
+
 if __name__ == "__main__":
     main()
-
