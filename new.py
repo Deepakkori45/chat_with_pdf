@@ -66,9 +66,19 @@ def get_conversational_chain():
     chain = load_qa_chain(model, chain_type="stuff", prompt=prompt)
     return chain
 
-# Initialize conversation history in session state if not already present
-if 'conversation_history' not in st.session_state:
-    st.session_state.conversation_history = []
+# Function to translate roles between Gemini-Pro and Streamlit terminology
+def translate_role_for_streamlit(user_role):
+    if user_role == "model":
+        return "assistant"
+    else:
+        return user_role
+if "conversation_history" not in st.session_state:
+    st.session_state.conversation_history = model.start_chat(history=[])
+    
+# Display the chat history
+for message in st.session_state.chat_session.history:
+    with st.chat_message(translate_role_for_streamlit(message.role)):
+        st.markdown(message.parts[0].text)
 
 # Function to handle user input, process it using the conversational chain, and update conversation history
 def user_input(user_question):
@@ -82,32 +92,27 @@ def user_input(user_question):
     full_context = conversation_context + current_context if conversation_context else current_context
 
     chain = get_conversational_chain()
-    response = chain({"input_documents": docs, "question": full_context}, return_only_outputs=True)
-    
+    # response = chain({"input_documents": docs, "question": full_context}, return_only_outputs=True)
+    response = st.session_state.chat_session.send_message(user_prompt)
+    # Display Gemini-Pro's response
+    with st.chat_message("assistant"):
+        st.markdown(gemini_response.text)
     # Update the conversation history in the session state
     st.session_state.conversation_history.append((user_question, response["output_text"]))
     st.write("Reply: ", response["output_text"])
-
-# Function to display the conversation history
-def display_history():
-    for i, (q, a) in enumerate(st.session_state.conversation_history, 1):
-        st.text(f"Q{i}: {q}\nA{i}: {a}\n")
 
 # Main function to configure the app and handle user interactions
 def main():
     st.set_page_config("Chat PDF")
     st.header("Chat with Model💁")
 
-    # Initialize conversation history if not already initialized
-    if 'conversation_history' not in st.session_state:
-        st.session_state.conversation_history = []
     
     # User input for asking questions
     # user_question = st.text_input("Ask a Question from the PDF Files")
     user_question  = st.chat_input("Ask a question")
-    if user_question:
-        user_input(user_question)
-        display_history()  # Display the conversation history
+    # if user_question:
+    #     user_input(user_question)
+    #     display_history()  # Display the conversation history
         
     # Sidebar for uploading PDF files and processing them
     with st.sidebar:
